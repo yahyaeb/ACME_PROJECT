@@ -113,24 +113,6 @@ pair) issued by the CA per domain. This is the simplest path when available.
 
 ---
 
-## Repository Layout
-
-```
-acme-certbot-automation/
-├── README.md
-├── .gitignore
-├── config/
-│   └── cli.ini.example
-├── scripts/
-│   ├── renew-certificates.sh
-│   └── deploy-hook.sh
-└── systemd/                        # optional — alternative to cron
-    ├── certbot-renew.service
-    └── certbot-renew.timer
-```
-
----
-
 ## Configuration
 
 Certbot reads its global configuration from `/etc/letsencrypt/cli.ini`.
@@ -275,6 +257,10 @@ echo "Deploy hook started at $(date)" >> "$LOGFILE"
 
 # Check certificate file permissions
 echo "Checking certificate permissions..." >> "$LOGFILE"
+chmod 755 /etc/letsencrypt/live
+chmod 755 /etc/letsencrypt/archive
+chmod 755 /etc/letsencrypt/archive/"$DOMAIN"
+chmod 644 /etc/letsencrypt/archive/"$DOMAIN"/*.pem
 ls -l /etc/letsencrypt/live/"$DOMAIN"/ >> "$LOGFILE" 2>&1
 
 # Validate service configuration
@@ -322,7 +308,7 @@ Description=Renew ACME TLS certificates
 
 [Service]
 Type=oneshot
-ExecStart=/path/to/scripts/renew-certificates.sh
+ExecStart=/usr/bin/certbot renew
 ```
 
 `systemd/certbot-renew.timer`:
